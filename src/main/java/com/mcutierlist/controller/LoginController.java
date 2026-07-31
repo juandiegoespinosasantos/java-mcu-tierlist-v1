@@ -1,0 +1,43 @@
+package com.mcutierlist.controller;
+
+import com.mcutierlist.entity.User;
+import com.mcutierlist.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+public class LoginController {
+
+    private final UserRepository userRepository;
+
+    public LoginController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestParam String username, HttpSession session, Model model) {
+        return userRepository.findById(username)
+            .map(user -> {
+                session.setAttribute("username", user.getUsername());
+                session.setAttribute("name", user.getName());
+                return "redirect:/";
+            })
+            .orElseGet(() -> {
+                model.addAttribute("error", "Username not found.");
+                return "login";
+            });
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
+}
