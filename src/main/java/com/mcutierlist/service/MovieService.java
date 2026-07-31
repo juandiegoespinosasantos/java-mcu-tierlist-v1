@@ -64,6 +64,23 @@ public class MovieService {
             .collect(Collectors.toList());
     }
 
+    public LinkedHashMap<Integer, List<MovieScoreDTO>> getMoviesByPhase(String username) {
+        LinkedHashMap<Integer, List<MovieScoreDTO>> byPhase = new LinkedHashMap<>();
+        getMoviesWithScores(username).forEach(dto ->
+            byPhase.computeIfAbsent(dto.movie().getPhase(), p -> new ArrayList<>()).add(dto));
+        return byPhase;
+    }
+
+    public Map<String, String> getScoreLabelsForDisplay() {
+        return scoreLabelRepository.findAll().stream()
+            .collect(Collectors.toMap(
+                sl -> sl.getScore().setScale(1).toPlainString(),
+                ScoreLabel::getDisplayName,
+                (a, b) -> a,
+                LinkedHashMap::new
+            ));
+    }
+
     public LinkedHashMap<String, List<MovieScoreDTO>> getMoviesByTier(String username) {
         List<MovieScoreDTO> rated = getMoviesWithScores(username).stream()
             .filter(dto -> dto.score() != null)
