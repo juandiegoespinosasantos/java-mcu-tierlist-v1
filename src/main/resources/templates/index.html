@@ -6,199 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MCU Tier List</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #1a1a2e;
-            color: #eee;
-        }
-
-        .navbar {
-            background-color: #16213e;
-        }
-
-        .card {
-            background-color: #16213e;
-            border-color: #0f3460;
-        }
-
-        .table {
-            --bs-table-bg: transparent;
-            --bs-table-color: #eee;
-        }
-
-        .table th {
-            color: #aaa;
-            border-color: #0f3460;
-        }
-
-        .table td {
-            border-color: #0f3460;
-            vertical-align: middle;
-        }
-
-        .poster-thumb {
-            width: 40px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .tier-row {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #0f3460;
-            min-height: 80px;
-        }
-
-        .tier-label {
-            width: 120px;
-            min-width: 120px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 8px;
-        }
-
-        .tier-movies {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            padding: 8px;
-        }
-
-        .tier-poster {
-            width: 55px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .tier-poster-placeholder {
-            width: 55px;
-            height: 80px;
-            background: #0f3460;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6rem;
-            text-align: center;
-            color: #aaa;
-            padding: 4px;
-        }
-
-        .drag-handle {
-            cursor: grab;
-            color: #aaa;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .tier-Excellent {
-            background-color: #1da1f2;
-        }
-
-        .tier-Very-Good {
-            background-color: #28b463;
-            color: #000;
-        }
-
-        .tier-Good {
-            background-color: #f4d03f;
-        }
-
-        .tier-Weak {
-            background-color: #f39c12;
-        }
-
-        .tier-Bad {
-            background-color: #e74c3c;
-        }
-
-        .star-rating {
-            position: relative;
-            display: inline-block;
-            font-size: 1.5rem;
-            line-height: 1;
-            width: 5em;
-        }
-
-        .star-bg, .star-fill {
-            display: block;
-            white-space: nowrap;
-            pointer-events: none;
-        }
-
-        .star-bg {
-            color: #444;
-        }
-
-        .star-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            overflow: hidden;
-            color: #ffcc00;
-            width: 0;
-        }
-
-        .star-click-zones {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-        }
-
-        .star-zone {
-            flex: 1 1 0;
-            cursor: pointer;
-        }
-
-        .nav-pills .nav-link {
-            color: #ccc;
-        }
-
-        .nav-pills .nav-link.active {
-            background-color: #0f3460;
-            color: #fff;
-        }
-
-        .rate-card {
-            cursor: pointer;
-            width: 130px;
-        }
-
-        .poster-thumb-lg {
-            width: 130px;
-            height: 195px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .rate-card:hover .poster-thumb-lg {
-            outline: 2px solid #e94560;
-        }
-
-        .rate-card-title {
-            font-size: 0.85rem;
-            margin-top: 6px;
-        }
-
-        .star-rating.star-rating-view {
-            font-size: 1rem;
-            width: 3.5em;
-        }
-
-        .star-rating.star-rating-interactive {
-            font-size: 2rem;
-            width: 6.5em;
-            margin: 0 auto;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/main.css" />
 </head>
 
 <body>
@@ -240,6 +48,7 @@
                     <thead>
                         <tr>
                             <th></th>
+                            <th>Ranking</th>
                             <th>Poster</th>
                             <th>Title</th>
                             <th>Phase</th>
@@ -248,30 +57,33 @@
                         </tr>
                     </thead>
                     <tbody id="movieTableBody">
-                        <tr th:each="dto : ${movies}" th:data-id="${dto.movie().id}" th:data-tier="${dto.tier()}">
+                        <tr th:each="dto : ${movies}" th:data-id="${dto.movie.id}" th:data-tier="${dto.tier}">
                             <td>
-                                <span class="drag-handle" th:if="${dto.score() != null}">&#8597;</span>
+                                <span class="drag-handle" th:if="${dto.score != null}">&#8597;</span>
                             </td>
                             <td>
-                                <img th:if="${dto.movie().posterUrl != null}" th:src="${dto.movie().posterUrl}"
-                                    class="poster-thumb" th:alt="${dto.movie().originalTitle}" />
-                                <div th:unless="${dto.movie().posterUrl != null}" class="poster-thumb bg-secondary d-flex align-items-center
+
+                            </td>
+                            <td th:src="${dto.ranking}">
+                                <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
+                                    class="poster-thumb" th:alt="${dto.movie.originalTitle}" />
+                                <div th:unless="${dto.movie.posterUrl != null}" class="poster-thumb bg-secondary d-flex align-items-center
                                         justify-content-center text-muted" style="font-size:0.6rem;">
                                     No poster
                                 </div>
                             </td>
                             <td>
-                                <div th:text="${dto.movie().originalTitle}"></div>
-                                <small class="text-muted" th:if="${dto.movie().alternativeTitle != null}"
-                                    th:text="${dto.movie().alternativeTitle}"></small>
+                                <div th:text="${dto.movie.originalTitle}"></div>
+                                <small class="text-muted" th:if="${dto.movie.alternativeTitle != null}"
+                                    th:text="${dto.movie.alternativeTitle}"></small>
                             </td>
-                            <td th:text="${dto.movie().phase != null ? 'Phase ' + dto.movie().phase : '—'}"></td>
-                            <td th:text="${dto.movie().releaseDate}"></td>
+                            <td th:text="${dto.movie.phase != null ? 'Phase ' + dto.movie.phase : '—'}"></td>
+                            <td th:text="${dto.movie.releaseDate}"></td>
                             <td>
-                                <span th:if="${dto.score() != null}" class="badge"
-                                    th:classappend="'tier-' + ${dto.tier().replace(' ', '-')}"
-                                    th:text="${#numbers.formatDecimal(dto.score(), 1, 1) + '/5.0'}"></span>
-                                <span th:unless="${dto.score() != null}" class="text-muted">—</span>
+                                <span th:if="${dto.score != null}" class="badge"
+                                    th:classappend="'tier-' + ${dto.tier.replace(' ', '-')}"
+                                    th:text="${#numbers.formatDecimal(dto.score, 1, 1) + '/5.0'}"></span>
+                                <span th:unless="${dto.score != null}" class="text-muted">—</span>
                             </td>
                         </tr>
                     </tbody>
@@ -287,18 +99,18 @@
                     <div class="d-flex flex-wrap gap-3">
                         <div th:each="dto : ${entry.value}" class="rate-card text-center" data-bs-toggle="modal"
                             data-bs-target="#rateModal"
-                            th:attr="data-movie-id=${dto.movie().id},
-                                      data-movie-title=${dto.movie().originalTitle},
-                                      data-movie-score=${dto.score() != null ? dto.score() : 0}">
-                            <img th:if="${dto.movie().posterUrl != null}" th:src="${dto.movie().posterUrl}"
-                                class="poster-thumb-lg" th:alt="${dto.movie().originalTitle}" />
-                            <div th:unless="${dto.movie().posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
+                            th:attr="data-movie-id=${dto.movie.id},
+                                      data-movie-title=${dto.movie.originalTitle},
+                                      data-movie-score=${dto.score != null ? dto.score : 0}">
+                            <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
+                                class="poster-thumb-lg" th:alt="${dto.movie.originalTitle}" />
+                            <div th:unless="${dto.movie.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
                                     justify-content-center text-muted" style="font-size:0.7rem;">
                                 No poster
                             </div>
-                            <div class="rate-card-title" th:text="${dto.movie().originalTitle}"></div>
+                            <div class="rate-card-title" th:text="${dto.movie.originalTitle}"></div>
                             <div class="star-rating star-rating-view mx-auto"
-                                th:attr="data-score=${dto.score() != null ? dto.score() : 0}">
+                                th:attr="data-score=${dto.score != null ? dto.score : 0}">
                                 <span class="star-bg">★★★★★</span>
                                 <span class="star-fill">★★★★★</span>
                             </div>
@@ -347,11 +159,11 @@
                     </div>
                     <div class="tier-movies">
                         <div th:each="dto : ${entry.value}">
-                            <img th:if="${dto.movie().posterUrl != null}" th:src="${dto.movie().posterUrl}"
-                                th:alt="${dto.movie().originalTitle}" th:title="${dto.movie().originalTitle}"
+                            <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
+                                th:alt="${dto.movie.originalTitle}" th:title="${dto.movie.originalTitle}"
                                 class="tier-poster" />
-                            <div th:unless="${dto.movie().posterUrl != null}" class="tier-poster-placeholder"
-                                th:text="${dto.movie().originalTitle}">
+                            <div th:unless="${dto.movie.posterUrl != null}" class="tier-poster-placeholder"
+                                th:text="${dto.movie.originalTitle}">
                             </div>
                         </div>
                         <span th:if="${entry.value.isEmpty()}" class="text-muted fst-italic ps-2">
