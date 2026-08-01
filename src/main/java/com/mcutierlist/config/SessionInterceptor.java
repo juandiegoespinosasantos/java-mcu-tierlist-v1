@@ -5,6 +5,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/**
+ * Interceptor redirecting unauthenticated requests to the login page.
+ *
+ * @author jdespinosa0014@outlook.com
+ * @version Aug 1, 2026
+ * @since 25
+ */
 public class SessionInterceptor implements HandlerInterceptor {
 
     @Override

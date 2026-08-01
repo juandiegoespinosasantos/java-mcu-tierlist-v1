@@ -1,7 +1,9 @@
 package com.mcutierlist.service;
 
 import com.mcutierlist.dto.MovieScoreDTO;
-import com.mcutierlist.entity.*;
+import com.mcutierlist.model.entities.Movie;
+import com.mcutierlist.model.entities.ScoreLabel;
+import com.mcutierlist.model.entities.UserMovieScore;
 import com.mcutierlist.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,13 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service handling movie scoring, tiering and ranking for the current user.
+ *
+ * @author jdespinosa0014@outlook.com
+ * @version Aug 1, 2026
+ * @since 25
+ */
 @Service
 public class MovieService {
 
@@ -53,6 +62,7 @@ public class MovieService {
                 UserMovieScore ums = scoreMap.get(movie.getId());
                 BigDecimal score = ums != null ? ums.getScore() : null;
                 ScoreLabel label = score != null ? labelMap.get(score) : null;
+
                 return new MovieScoreDTO(
                     movie,
                     score,
@@ -67,7 +77,7 @@ public class MovieService {
     public LinkedHashMap<Integer, List<MovieScoreDTO>> getMoviesByPhase(String username) {
         LinkedHashMap<Integer, List<MovieScoreDTO>> byPhase = new LinkedHashMap<>();
         getMoviesWithScores(username).forEach(dto ->
-            byPhase.computeIfAbsent(dto.movie().getPhase(), p -> new ArrayList<>()).add(dto));
+            byPhase.computeIfAbsent(dto.getMovie().getPhase(), p -> new ArrayList<>()).add(dto));
         return byPhase;
     }
 
@@ -83,16 +93,16 @@ public class MovieService {
 
     public LinkedHashMap<String, List<MovieScoreDTO>> getMoviesByTier(String username) {
         List<MovieScoreDTO> rated = getMoviesWithScores(username).stream()
-            .filter(dto -> dto.score() != null)
+            .filter(dto -> dto.getScore() != null)
             .collect(Collectors.toList());
 
         LinkedHashMap<String, List<MovieScoreDTO>> tierMap = new LinkedHashMap<>();
         TIER_ORDER.forEach(tier -> tierMap.put(tier, new ArrayList<>()));
 
-        rated.forEach(dto -> tierMap.get(dto.tier()).add(dto));
+        rated.forEach(dto -> tierMap.get(dto.getTier()).add(dto));
 
         tierMap.values().forEach(list ->
-            list.sort(Comparator.comparingInt(dto -> dto.ranking() != null ? dto.ranking() : Integer.MAX_VALUE))
+            list.sort(Comparator.comparingInt(dto -> dto.getRanking() != null ? dto.getRanking() : Integer.MAX_VALUE))
         );
 
         return tierMap;
@@ -144,22 +154,22 @@ public class MovieService {
 
     public List<String> getChartLabels(String username) {
         return getRatedSorted(username).stream()
-            .map(dto -> dto.movie().getOriginalTitle())
+            .map(dto -> dto.getMovie().getOriginalTitle())
             .collect(Collectors.toList());
     }
 
     public List<BigDecimal> getChartScores(String username) {
         return getRatedSorted(username).stream()
-            .map(MovieScoreDTO::score)
+            .map(MovieScoreDTO::getScore)
             .collect(Collectors.toList());
     }
 
     private List<MovieScoreDTO> getRatedSorted(String username) {
         return getMoviesWithScores(username).stream()
-            .filter(dto -> dto.score() != null)
+            .filter(dto -> dto.getScore() != null)
             .sorted(Comparator
-                .comparingInt((MovieScoreDTO dto) -> TIER_ORDER.indexOf(dto.tier()))
-                .thenComparingInt(dto -> dto.ranking() != null ? dto.ranking() : Integer.MAX_VALUE))
+                .comparingInt((MovieScoreDTO dto) -> TIER_ORDER.indexOf(dto.getTier()))
+                .thenComparingInt(dto -> dto.getRanking() != null ? dto.getRanking() : Integer.MAX_VALUE))
             .collect(Collectors.toList());
     }
 

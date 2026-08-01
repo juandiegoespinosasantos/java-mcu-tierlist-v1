@@ -1,12 +1,20 @@
 package com.mcutierlist.controller;
 
-import com.mcutierlist.entity.User;
 import com.mcutierlist.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Handles the username-only login/logout flow.
+ *
+ * @author jdespinosa0014@outlook.com
+ * @version Aug 1, 2026
+ * @since 25
+ */
 @Controller
 public class LoginController {
 
@@ -24,15 +32,15 @@ public class LoginController {
     @PostMapping("/login")
     public String login(@RequestParam String username, HttpSession session, Model model) {
         return userRepository.findById(username)
-            .map(user -> {
-                session.setAttribute("username", user.getUsername());
-                session.setAttribute("name", user.getName());
-                return "redirect:/";
-            })
-            .orElseGet(() -> {
-                model.addAttribute("error", "Username not found.");
-                return "login";
-            });
+                .map(user -> {
+                    session.setAttribute("username", user.getUsername());
+                    session.setAttribute("name", user.getName());
+                    return "redirect:/";
+                })
+                .orElseGet(() -> {
+                    model.addAttribute("error", "Username not found.");
+                    return "login";
+                });
     }
 
     @PostMapping("/logout")
