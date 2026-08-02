@@ -1,17 +1,19 @@
 package com.mcutierlist.service;
 
-import com.mcutierlist.dto.MovieScoreDTO;
+import com.mcutierlist.model.dto.MCUEntryDTO;
+import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
-import com.mcutierlist.model.entities.Score;
 import com.mcutierlist.model.entities.MovieScoreXUser;
+import com.mcutierlist.model.entities.Score;
 import com.mcutierlist.model.repositories.MCUEntryRepository;
-import com.mcutierlist.model.repositories.ScoreRepository;
 import com.mcutierlist.model.repositories.MovieScoreXUserRepository;
+import com.mcutierlist.model.repositories.ScoreRepository;
 import com.mcutierlist.model.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -61,10 +63,10 @@ public class MovieService {
         return "Bad";
     }
 
-    public List<MovieScoreDTO> getMoviesWithScores(String username) {
+    public List<McuEntryScoreDTO> getMoviesWithScores(String username) {
         List<MCUEntry> movies = movieRepository.findAllByOrderByReleaseDateAsc();
 
-        Map<Long, MovieScoreXUser> scoreMap = userMovieScoreRepository.findByUser(username)
+        Map<Long, MovieScoreXUser> scoreMap = userMovieScoreRepository.findByUserUsername(username)
                 .stream()
                 .collect(Collectors.toMap(ums -> ums.getMcuEntry().getId(), ums -> ums));
 
@@ -77,10 +79,19 @@ public class MovieService {
                     MovieScoreXUser ums = scoreMap.get(movie.getId());
                     Double score = ums != null ? ums.getScore() : null;
                     Score label = score != null ? labelMap.get(score) : null;
+                    MCUEntryDTO mcuEntry = new MCUEntryDTO(
+                            movie.getId(),
+                            movie.getOriginalTitle(),
+                            movie.getAlternativeTitle(),
+                            movie.getPhase(),
+                            movie.getReleaseDate(),
+                            movie.getPosterUrl(),
+                            movie.getCreatedAt(),
+                            movie.getUpdatedAt());
 
-                    return new MovieScoreDTO(
-                            movie,
-                            score != null ? BigDecimal.valueOf(score) : null,
+                    return new McuEntryScoreDTO(
+                            mcuEntry,
+                            score != null ? score : null,
                             label != null ? label.getDisplayName() : null,
                             score != null ? resolveTier(score) : null,
                             ums != null ? ums.getRanking() : null
@@ -89,10 +100,10 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    public LinkedHashMap<Integer, List<MovieScoreDTO>> getMoviesByPhase(String username) {
-        LinkedHashMap<Integer, List<MovieScoreDTO>> byPhase = new LinkedHashMap<>();
+    public LinkedHashMap<Integer, List<McuEntryScoreDTO>> getMoviesByPhase(String username) {
+        LinkedHashMap<Integer, List<McuEntryScoreDTO>> byPhase = new LinkedHashMap<>();
         getMoviesWithScores(username).forEach(dto ->
-                byPhase.computeIfAbsent(dto.getMovie().getPhase(), p -> new ArrayList<>()).add(dto));
+                byPhase.computeIfAbsent(dto.mcuEntry().phase(), p -> new ArrayList<>()).add(dto));
         return byPhase;
     }
 
@@ -106,18 +117,18 @@ public class MovieService {
                 ));
     }
 
-    public LinkedHashMap<String, List<MovieScoreDTO>> getMoviesByTier(String username) {
-        List<MovieScoreDTO> rated = getMoviesWithScores(username).stream()
-                .filter(dto -> dto.getScore() != null)
+    public LinkedHashMap<String, List<McuEntryScoreDTO>> getMoviesByTier(String username) {
+        List<McuEntryScoreDTO> rated = getMoviesWithScores(username).stream()
+                .filter(dto -> dto.score() != null)
                 .collect(Collectors.toList());
 
-        LinkedHashMap<String, List<MovieScoreDTO>> tierMap = new LinkedHashMap<>();
+        LinkedHashMap<String, List<McuEntryScoreDTO>> tierMap = new LinkedHashMap<>();
         TIER_ORDER.forEach(tier -> tierMap.put(tier, new ArrayList<>()));
 
-        rated.forEach(dto -> tierMap.get(dto.getTier()).add(dto));
+        rated.forEach(dto -> tierMap.get(dto.tier()).add(dto));
 
         tierMap.values().forEach(list ->
-                list.sort(Comparator.comparingInt(dto -> dto.getRanking() != null ? dto.getRanking() : Integer.MAX_VALUE))
+                list.sort(Comparator.comparingInt(dto -> dto.ranking() != null ? dto.ranking() : Integer.MAX_VALUE))
         );
 
         return tierMap;
@@ -131,6 +142,7 @@ public class MovieService {
                     MovieScoreXUser newUms = new MovieScoreXUser();
                     newUms.setUser(userRepository.findById(username).orElseThrow());
                     newUms.setMcuEntry(movieRepository.findById(movieId).orElseThrow());
+                    newUms.setCreatedAt(ZonedDateTime.now());
                     return newUms;
                 });
 
@@ -141,11 +153,11 @@ public class MovieService {
 
         if (!newTier.equals(oldTier) || ums.getRanking() == null) {
             Double[] range = TIER_RANGES.get(newTier);
-            int count = userMovieScoreRepository.countByUserUsernameAndScoreBetween(
-                    username, range[0], range[1]);
+            int count = userMovieScoreRepository.countByUserUsernameAndScoreBetween(username, range[0], range[1]);
             ums.setRanking(count + 1);
         }
 
+        ums.setUpdatedAt(ZonedDateTime.now());
         userMovieScoreRepository.save(ums);
     }
 
@@ -157,6 +169,7 @@ public class MovieService {
                     .ifPresent(ums -> {
                     });
         }
+
         for (int i = 0; i < movieIds.size(); i++) {
             final int rank = i + 1;
             userMovieScoreRepository
@@ -170,22 +183,22 @@ public class MovieService {
 
     public List<String> getChartLabels(String username) {
         return getRatedSorted(username).stream()
-                .map(dto -> dto.getMovie().getOriginalTitle())
+                .map(dto -> dto.mcuEntry().originalTitle())
                 .collect(Collectors.toList());
     }
 
-    public List<BigDecimal> getChartScores(String username) {
+    public List<Double> getChartScores(String username) {
         return getRatedSorted(username).stream()
-                .map(MovieScoreDTO::getScore)
+                .map(McuEntryScoreDTO::score)
                 .collect(Collectors.toList());
     }
 
-    private List<MovieScoreDTO> getRatedSorted(String username) {
+    private List<McuEntryScoreDTO> getRatedSorted(String username) {
         return getMoviesWithScores(username).stream()
-                .filter(dto -> dto.getScore() != null)
+                .filter(dto -> dto.score() != null)
                 .sorted(Comparator
-                        .comparingInt((MovieScoreDTO dto) -> TIER_ORDER.indexOf(dto.getTier()))
-                        .thenComparingInt(dto -> dto.getRanking() != null ? dto.getRanking() : Integer.MAX_VALUE))
+                        .comparingInt((McuEntryScoreDTO dto) -> TIER_ORDER.indexOf(dto.tier()))
+                        .thenComparingInt(dto -> dto.ranking() != null ? dto.ranking() : Integer.MAX_VALUE))
                 .collect(Collectors.toList());
     }
 }

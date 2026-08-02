@@ -39,7 +39,7 @@
 
             <!-- Line chart -->
             <div class="card mb-4 p-3">
-                <canvas id="scoreChart" height="80"></canvas>
+                <canvas id="scoreChart" height="300"></canvas>
             </div>
 
             <!-- Movie table -->
@@ -48,37 +48,28 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th>Ranking</th>
-                            <th>Poster</th>
-                            <th>Title</th>
-                            <th>Phase</th>
-                            <th>Release</th>
+                            <th>#</th>
+                            <th>Movie</th>
                             <th>Score</th>
                         </tr>
                     </thead>
                     <tbody id="movieTableBody">
-                        <tr th:each="dto : ${movies}" th:data-id="${dto.movie.id}" th:data-tier="${dto.tier}">
+                        <tr th:each="dto : ${movies}" th:data-id="${dto.mcuEntry.id}" th:data-tier="${dto.tier}">
                             <td>
                                 <span class="drag-handle" th:if="${dto.score != null}">&#8597;</span>
                             </td>
+                            <td th:text="${dto.ranking}"></td>
                             <td>
-
-                            </td>
-                            <td th:src="${dto.ranking}">
-                                <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
-                                    class="poster-thumb" th:alt="${dto.movie.originalTitle}" />
-                                <div th:unless="${dto.movie.posterUrl != null}" class="poster-thumb bg-secondary d-flex align-items-center
+                                <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
+                                    class="poster-thumb" th:alt="${dto.mcuEntry.originalTitle}" />
+                                <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb bg-secondary d-flex align-items-center
                                         justify-content-center text-muted" style="font-size:0.6rem;">
                                     No poster
                                 </div>
+                                <span class="movie-title" th:text="${dto.mcuEntry.originalTitle}"></span>
+                                <small class="text-muted movie-year"
+                                    th:text="${' (' + #temporals.format(dto.mcuEntry.releaseDate, 'yyyy') + ')'}"></small>
                             </td>
-                            <td>
-                                <div th:text="${dto.movie.originalTitle}"></div>
-                                <small class="text-muted" th:if="${dto.movie.alternativeTitle != null}"
-                                    th:text="${dto.movie.alternativeTitle}"></small>
-                            </td>
-                            <td th:text="${dto.movie.phase != null ? 'Phase ' + dto.movie.phase : '—'}"></td>
-                            <td th:text="${dto.movie.releaseDate}"></td>
                             <td>
                                 <span th:if="${dto.score != null}" class="badge"
                                     th:classappend="'tier-' + ${dto.tier.replace(' ', '-')}"
@@ -98,17 +89,16 @@
                 <div class="card p-3">
                     <div class="d-flex flex-wrap gap-3">
                         <div th:each="dto : ${entry.value}" class="rate-card text-center" data-bs-toggle="modal"
-                            data-bs-target="#rateModal"
-                            th:attr="data-movie-id=${dto.movie.id},
-                                      data-movie-title=${dto.movie.originalTitle},
+                            data-bs-target="#rateModal" th:attr="data-movie-id=${dto.mcuEntry.id},
+                                      data-movie-title=${dto.mcuEntry.originalTitle},
                                       data-movie-score=${dto.score != null ? dto.score : 0}">
-                            <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
-                                class="poster-thumb-lg" th:alt="${dto.movie.originalTitle}" />
-                            <div th:unless="${dto.movie.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
+                            <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
+                                class="poster-thumb-lg" th:alt="${dto.mcuEntry.originalTitle}" />
+                            <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
                                     justify-content-center text-muted" style="font-size:0.7rem;">
                                 No poster
                             </div>
-                            <div class="rate-card-title" th:text="${dto.movie.originalTitle}"></div>
+                            <div class="rate-card-title" th:text="${dto.mcuEntry.originalTitle}"></div>
                             <div class="star-rating star-rating-view mx-auto"
                                 th:attr="data-score=${dto.score != null ? dto.score : 0}">
                                 <span class="star-bg">★★★★★</span>
@@ -132,8 +122,8 @@
                                 <span class="star-bg">★★★★★</span>
                                 <span class="star-fill">★★★★★</span>
                                 <div class="star-click-zones">
-                                    <span th:each="s : ${ {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0} }"
-                                        class="star-zone" th:attr="data-value=${s}"></span>
+                                    <span th:each="s : ${ {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0} }" class="star-zone"
+                                        th:attr="data-value=${s}"></span>
                                 </div>
                             </div>
                             <div id="rateModalLabel" class="mt-2 text-muted">Select a rating</div>
@@ -159,11 +149,11 @@
                     </div>
                     <div class="tier-movies">
                         <div th:each="dto : ${entry.value}">
-                            <img th:if="${dto.movie.posterUrl != null}" th:src="${dto.movie.posterUrl}"
-                                th:alt="${dto.movie.originalTitle}" th:title="${dto.movie.originalTitle}"
+                            <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
+                                th:alt="${dto.mcuEntry.originalTitle}" th:title="${dto.mcuEntry.originalTitle}"
                                 class="tier-poster" />
-                            <div th:unless="${dto.movie.posterUrl != null}" class="tier-poster-placeholder"
-                                th:text="${dto.movie.originalTitle}">
+                            <div th:unless="${dto.mcuEntry.posterUrl != null}" class="tier-poster-placeholder"
+                                th:text="${dto.mcuEntry.originalTitle}">
                             </div>
                         </div>
                         <span th:if="${entry.value.isEmpty()}" class="text-muted fst-italic ps-2">
@@ -196,7 +186,7 @@
                         data: chartScores,
                         borderColor: '#e94560',
                         backgroundColor: 'rgba(233,69,96,0.15)',
-                        tension: 0.3,
+                        tension: 0.0,
                         fill: true,
                         pointRadius: 5,
                     }]

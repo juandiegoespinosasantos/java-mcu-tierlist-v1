@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface MovieScoreXUserRepository extends JpaRepository<MovieScoreXUser, Long> {
 
-    List<MovieScoreXUser> findByUser(String username);
+    List<MovieScoreXUser> findByUserUsername(String username);
 
     Optional<MovieScoreXUser> findByUserUsernameAndMcuEntryId(String username, Long movieId);
 
