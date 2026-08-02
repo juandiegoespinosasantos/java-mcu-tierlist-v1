@@ -29,3 +29,6 @@
 - Implement `Serializable` class and set its correspondent `serialVersionUID`. This value should be unique (never set `1L`).
 - For entities, use Object types instead of primitive types on fields that map columns (for example, `Integer` instead of `int`).
 - For entities, always add `@Column` annotation on fields mapping columns. Set the field name same as column name but with the Java naming convention (for example `original_title` is `originalTitle`).
+
+## Repositories
+- Repository classes that stand as the DAO layer of an entity must be interfaces that extend from `org.springframework.data.jpa.repository.JpaRepository` and use the annotation `org.springframework.stereotype.Repository`.

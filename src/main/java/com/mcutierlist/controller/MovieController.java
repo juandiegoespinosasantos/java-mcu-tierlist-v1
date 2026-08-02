@@ -51,7 +51,7 @@ public class MovieController {
 
     @PostMapping("/movies/{id}/score")
     public String updateScore(@PathVariable Long id,
-                              @RequestParam BigDecimal score,
+                              @RequestParam Double score,
                               @RequestParam(defaultValue = "rate") String tab,
                               HttpSession session) {
         String username = (String) session.getAttribute("username");

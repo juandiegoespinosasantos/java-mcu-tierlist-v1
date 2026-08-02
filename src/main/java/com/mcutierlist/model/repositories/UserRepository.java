@@ -1,7 +1,8 @@
-package com.mcutierlist.repository;
+package com.mcutierlist.model.repositories;
 
 import com.mcutierlist.model.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository for manually-seeded {@link User} accounts.
@@ -10,5 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @version Aug 1, 2026
  * @since 25
  */
+@Repository
 public interface UserRepository extends JpaRepository<User, String> {
 }

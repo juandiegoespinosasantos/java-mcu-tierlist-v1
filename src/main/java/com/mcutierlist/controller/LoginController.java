@@ -1,6 +1,6 @@
 package com.mcutierlist.controller;
 
-import com.mcutierlist.repository.UserRepository;
+import com.mcutierlist.model.repositories.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

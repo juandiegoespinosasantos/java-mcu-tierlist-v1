@@ -14,8 +14,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 /**
  * Entity for UserMovieScore table.
@@ -29,29 +30,34 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(
-    name = "user_movie_scores",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"username", "movie_id"})
-)
-public class UserMovieScore implements Serializable {
+@Table(name = "movie_score_x_user", uniqueConstraints = @UniqueConstraint(columnNames = {"user", "mcu_entry"}))
+public class MovieScoreXUser implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -5647382910473625181L;
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "username")
+    @JoinColumn(name = "user")
     private User user;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
+    @JoinColumn(name = "mcu_entry")
+    private MCUEntry mcuEntry;
 
     @Column(name = "score")
-    private BigDecimal score;
+    private Double score;
 
     @Column(name = "ranking")
     private Integer ranking;
+
+    @Column(name = "created_at", nullable = false)
+    private ZonedDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private ZonedDateTime updatedAt;
 }

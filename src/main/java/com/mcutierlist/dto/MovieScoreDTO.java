@@ -1,6 +1,6 @@
 package com.mcutierlist.dto;
 
-import com.mcutierlist.model.entities.Movie;
+import com.mcutierlist.model.entities.MCUEntry;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +24,7 @@ public class MovieScoreDTO implements Serializable {
 
     private static final long serialVersionUID = 4816273950162738495L;
 
-    private Movie movie;
+    private MCUEntry movie;
 
     private BigDecimal score;
 

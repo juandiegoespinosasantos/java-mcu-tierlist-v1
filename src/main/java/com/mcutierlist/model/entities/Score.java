@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -22,13 +23,15 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "score_labels")
-public class ScoreLabel implements Serializable {
+@Table(name = "score")
+public class Score implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1928374650192837465L;
 
     @Id
-    private BigDecimal score;
+    @Column(name = "score")
+    private Double score;
 
     @Column(name = "description", nullable = false)
     private String description;

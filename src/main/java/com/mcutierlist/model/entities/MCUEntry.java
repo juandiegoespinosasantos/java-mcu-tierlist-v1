@@ -11,8 +11,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 /**
  * Entity for Movie table.
@@ -26,12 +27,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "movies")
-public class Movie implements Serializable {
+@Table(name = "mcu_entry")
+public class MCUEntry implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -3826194057382910447L;
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -42,11 +45,17 @@ public class Movie implements Serializable {
     private String alternativeTitle;
 
     @Column(name = "release_date", nullable = false)
-    private LocalDate releaseDate;
+    private ZonedDateTime releaseDate;
 
-    @Column(name = "phase")
+    @Column(name = "phase", nullable = false)
     private Integer phase;
 
     @Column(name = "poster_url")
     private String posterUrl;
+
+    @Column(name = "created_at", nullable = false)
+    private ZonedDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private ZonedDateTime updatedAt;
 }
