@@ -43,7 +43,7 @@
                         </tr>
                     </thead>
                     <tbody id="movieTableBody">
-                        <tr th:each="dto : ${movies}" th:data-id="${dto.mcuEntry.id}" th:data-tier="${dto.tier}">
+                        <tr th:each="dto : ${movies}" th:data-id="${dto.mcuEntry.id}" th:data-tier="${dto.score}">
                             <td>
                                 <span class="drag-handle" th:if="${dto.score != null}">&#8597;</span>
                             </td>
@@ -61,8 +61,8 @@
                             </td>
                             <td>
                                 <span th:if="${dto.score != null}" class="badge"
-                                    th:classappend="'tier-' + ${dto.tier.replace(' ', '-')}"
-                                    th:text="${#numbers.formatDecimal(dto.score, 1, 1) + '/5.0'}"></span>
+                                    th:classappend="'tier-' + ${dto.score.description.replace(' ', '-')}"
+                                    th:text="${#numbers.formatDecimal(dto.score.score, 1, 1) + '/5.0'}"></span>
                                 <span th:unless="${dto.score != null}" class="text-muted">—</span>
                             </td>
                         </tr>

@@ -1,5 +1,6 @@
 package com.mcutierlist.controller;
 
+import com.mcutierlist.enums.MovieOrder;
 import com.mcutierlist.services.MovieService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -38,10 +39,11 @@ public class MoviesController {
         String safeView = VALID_VIEWS.contains(view) ? view : "list";
         model.addAttribute("name", session.getAttribute("name"));
         model.addAttribute("view", safeView);
+
         if (safeView.equals("tierlist")) {
             model.addAttribute("tierList", movieService.getMoviesByTier(username));
         } else {
-            model.addAttribute("movies", movieService.getMoviesWithScores(username));
+            model.addAttribute("movies", movieService.getMoviesWithScores(username, MovieOrder.BY_RANKING));
             model.addAttribute("chartLabels", movieService.getChartLabels(username));
             model.addAttribute("chartScores", movieService.getChartScores(username));
         }

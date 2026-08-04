@@ -1,5 +1,6 @@
 package com.mcutierlist.services;
 
+import com.mcutierlist.enums.MovieOrder;
 import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
@@ -31,10 +32,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class MovieService implements IMovieService {
 
-    private static final List<String> TIER_ORDER = List.of("Excellent", "Very Good", "Good", "Weak", "Bad");
+    private static final List<String> TIER_ORDER = List.of("Top", "Very Good", "Good", "Weak", "Bad");
 
     private static final Map<String, Double[]> TIER_RANGES = Map.of(
-            "Excellent", new Double[]{4.5, 5.0},
+            "Top", new Double[]{4.5, 5.0},
             "Very Good", new Double[]{4.0, 4.4},
             "Good", new Double[]{3.0, 3.9},
             "Weak", new Double[]{2.0, 2.9},
@@ -56,26 +57,28 @@ public class MovieService implements IMovieService {
         this.movieScoreXUserRepository = movieScoreXUserRepository;
     }
 
-
-    public List<McuEntryScoreDTO> getMoviesWithScores(final String username) {
+    public List<McuEntryScoreDTO> getMoviesWithScores(final String username, final MovieOrder orderBy) {
         List<MCUEntry> allMovies = mcuEntryRepository.findAllByOrderByReleaseDateAsc();
 
         Map<Long, MovieScoreXUser> userScoresByMovieId = movieScoreXUserRepository.findByUserUsername(username)
                 .stream()
                 .collect(Collectors.toMap(msu -> msu.getMcuEntry().getId(), ums -> ums));
 
+        Comparator<McuEntryScoreDTO> comparator = MovieOrder.BY_ORIGINAL_ORDER.equals(orderBy) ?
+                Comparator.comparing(dto -> dto.mcuEntry().releaseDate()) :
+                Comparator.comparing(McuEntryScoreDTO::ranking, Comparator.nullsLast(Comparator.naturalOrder()));
+
         return allMovies.stream()
                 .map(movie -> McuEntryAdapter.transform(movie, userScoresByMovieId))
+                .sorted(comparator)
                 .collect(Collectors.toList());
     }
 
-
     public Map<Integer, List<McuEntryScoreDTO>> getMoviesByPhase(final String username) {
-        return getMoviesWithScores(username)
+        return getMoviesWithScores(username, MovieOrder.BY_ORIGINAL_ORDER)
                 .stream()
                 .collect(Collectors.groupingBy(dto -> dto.mcuEntry().phase(), LinkedHashMap::new, Collectors.toList()));
     }
-
 
     public Map<String, String> getScoreLabelsForDisplay() {
         return scoreRepository.findAll()
@@ -84,7 +87,8 @@ public class MovieService implements IMovieService {
     }
 
     public LinkedHashMap<String, List<McuEntryScoreDTO>> getMoviesByTier(String username) {
-        List<McuEntryScoreDTO> rated = getMoviesWithScores(username).stream()
+        List<McuEntryScoreDTO> rated = getMoviesWithScores(username, MovieOrder.BY_RANKING)
+                .stream()
                 .filter(dto -> dto.score() != null)
                 .collect(Collectors.toList());
 
@@ -98,7 +102,6 @@ public class MovieService implements IMovieService {
 
         return tierMap;
     }
-
 
     public void updateScore(String username, Long movieId, Double newScoreValue) {
         MovieScoreXUser ums = movieScoreXUserRepository
@@ -148,23 +151,23 @@ public class MovieService implements IMovieService {
     }
 
     public List<String> getChartLabels(String username) {
-        return getRatedSorted(username).stream()
+        return getRatedSorted(username)
+                .stream()
                 .map(dto -> dto.mcuEntry().originalTitle())
                 .collect(Collectors.toList());
     }
 
     public List<Double> getChartScores(String username) {
-        return getRatedSorted(username).stream()
+        return getRatedSorted(username)
+                .stream()
                 .map(mcuEntryScoreDTO -> mcuEntryScoreDTO.score().score())
                 .collect(Collectors.toList());
     }
 
     private List<McuEntryScoreDTO> getRatedSorted(String username) {
-        return getMoviesWithScores(username).stream()
+        return getMoviesWithScores(username, MovieOrder.BY_ORIGINAL_ORDER)
+                .stream()
                 .filter(dto -> dto.score() != null)
-                .sorted(Comparator
-                        .comparingInt((McuEntryScoreDTO dto) -> TIER_ORDER.indexOf(dto.score().description()))
-                        .thenComparingInt(dto -> dto.ranking() != null ? dto.ranking() : Integer.MAX_VALUE))
                 .collect(Collectors.toList());
     }
 }
