@@ -1,6 +1,6 @@
 package com.mcutierlist.controller;
 
-import com.mcutierlist.service.MovieService;
+import com.mcutierlist.services.MovieService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

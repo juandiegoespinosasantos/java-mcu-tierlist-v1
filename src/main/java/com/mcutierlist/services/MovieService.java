@@ -1,6 +1,5 @@
-package com.mcutierlist.service;
+package com.mcutierlist.services;
 
-import com.mcutierlist.model.dto.MCUEntryDTO;
 import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
@@ -9,6 +8,7 @@ import com.mcutierlist.model.repositories.MCUEntryRepository;
 import com.mcutierlist.model.repositories.MovieScoreXUserRepository;
 import com.mcutierlist.model.repositories.ScoreRepository;
 import com.mcutierlist.model.repositories.UserRepository;
+import com.mcutierlist.utils.adapters.McuEntryAdapter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * @since 25
  */
 @Service
-public class MovieService {
+public class MovieService implements IMovieService {
 
     private static final List<String> TIER_ORDER = List.of("Excellent", "Very Good", "Good", "Weak", "Bad");
 
@@ -55,48 +55,19 @@ public class MovieService {
         this.userMovieScoreRepository = userMovieScoreRepository;
     }
 
-    public static String resolveTier(Double score) {
-        if (score >= 4.5) return "Excellent";
-        if (score >= 4.0) return "Very Good";
-        if (score >= 3.0) return "Good";
-        if (score >= 2.0) return "Weak";
-        return "Bad";
-    }
+    public List<McuEntryScoreDTO> getMoviesWithScores(final String username) {
+        List<MCUEntry> allMovies = movieRepository.findAllByOrderByReleaseDateAsc();
 
-    public List<McuEntryScoreDTO> getMoviesWithScores(String username) {
-        List<MCUEntry> movies = movieRepository.findAllByOrderByReleaseDateAsc();
-
-        Map<Long, MovieScoreXUser> scoreMap = userMovieScoreRepository.findByUserUsername(username)
+        Map<Long, MovieScoreXUser> scoredMoviesById = userMovieScoreRepository.findByUserUsername(username)
                 .stream()
                 .collect(Collectors.toMap(ums -> ums.getMcuEntry().getId(), ums -> ums));
 
         Map<Double, Score> labelMap = scoreLabelRepository.findAll()
                 .stream()
-                .collect(Collectors.toMap(Score::getScore, sl -> sl));
+                .collect(Collectors.toMap(Score::getScore, score -> score));
 
-        return movies.stream()
-                .map(movie -> {
-                    MovieScoreXUser ums = scoreMap.get(movie.getId());
-                    Double score = ums != null ? ums.getScore() : null;
-                    Score label = score != null ? labelMap.get(score) : null;
-                    MCUEntryDTO mcuEntry = new MCUEntryDTO(
-                            movie.getId(),
-                            movie.getOriginalTitle(),
-                            movie.getAlternativeTitle(),
-                            movie.getPhase(),
-                            movie.getReleaseDate(),
-                            movie.getPosterUrl(),
-                            movie.getCreatedAt(),
-                            movie.getUpdatedAt());
-
-                    return new McuEntryScoreDTO(
-                            mcuEntry,
-                            score != null ? score : null,
-                            label != null ? label.getDisplayName() : null,
-                            score != null ? resolveTier(score) : null,
-                            ums != null ? ums.getRanking() : null
-                    );
-                })
+        return allMovies.stream()
+                .map(movie -> McuEntryAdapter.transform(movie, scoredMoviesById, labelMap))
                 .collect(Collectors.toList());
     }
 
@@ -146,8 +117,8 @@ public class MovieService {
                     return newUms;
                 });
 
-        String oldTier = ums.getScore() != null ? resolveTier(ums.getScore()) : null;
-        String newTier = resolveTier(score);
+        String oldTier = ums.getScore() != null ? McuEntryAdapter.resolveTier(ums.getScore()) : null;
+        String newTier = McuEntryAdapter.resolveTier(score);
 
         ums.setScore(score);
 
