@@ -28,8 +28,8 @@ body {
 }
 
 .poster-thumb {
-    width: 40px;
-    height: 60px;
+    width: 66px;
+    height: 100px;
     object-fit: cover;
     border-radius: 4px;
 }
@@ -183,11 +183,25 @@ body {
 
 .star-rating.star-rating-view {
     font-size: 1rem;
-    width: 3.5em;
+    width: 4.5em;
 }
 
 .star-rating.star-rating-interactive {
     font-size: 2rem;
-    width: 6.5em;
+    width: 4.5em;
     margin: 0 auto;
+}
+
+.movie-title {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.movie-year {
+    color: white !important;
+}
+
+.badge {
+    color: black !important;
 }

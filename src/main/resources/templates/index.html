@@ -11,154 +11,60 @@
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark px-3">
-        <div class="d-flex align-items-center gap-3">
-            <span class="navbar-brand fw-bold mb-0">🎬 MCU Tier List</span>
-            <ul class="nav nav-pills">
-                <li class="nav-item"><a class="nav-link" th:classappend="${tab == 'movies'} ? 'active' : ''"
-                        href="/?tab=movies">Movies</a></li>
-                <li class="nav-item"><a class="nav-link" th:classappend="${tab == 'rate'} ? 'active' : ''"
-                        href="/?tab=rate">Rate</a></li>
-                <li class="nav-item"><a class="nav-link" th:classappend="${tab == 'tierlist'} ? 'active' : ''"
-                        href="/?tab=tierlist">Tier List</a></li>
-            </ul>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <span class="text-light" th:text="${name}"></span>
-            <form method="post" action="/logout" class="m-0">
-                <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-            </form>
-        </div>
-    </nav>
+    <nav th:replace="~{fragments/navbar :: navbar('rate')}"></nav>
 
     <div class="container-fluid py-4">
 
-        <!-- ===== MOVIES TAB ===== -->
-        <div th:if="${tab == 'movies'}">
-
-            <!-- Line chart -->
-            <div class="card mb-4 p-3">
-                <canvas id="scoreChart" height="300"></canvas>
-            </div>
-
-            <!-- Movie table -->
+        <!-- ===== RATE ===== -->
+        <div th:each="entry : ${moviesByPhase}" class="mb-4">
+            <h5 class="mb-3">Phase <span th:text="${entry.key}"></span></h5>
             <div class="card p-3">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>#</th>
-                            <th>Movie</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody id="movieTableBody">
-                        <tr th:each="dto : ${movies}" th:data-id="${dto.mcuEntry.id}" th:data-tier="${dto.tier}">
-                            <td>
-                                <span class="drag-handle" th:if="${dto.score != null}">&#8597;</span>
-                            </td>
-                            <td th:text="${dto.ranking}"></td>
-                            <td>
-                                <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
-                                    class="poster-thumb" th:alt="${dto.mcuEntry.originalTitle}" />
-                                <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb bg-secondary d-flex align-items-center
-                                        justify-content-center text-muted" style="font-size:0.6rem;">
-                                    No poster
-                                </div>
-                                <span class="movie-title" th:text="${dto.mcuEntry.originalTitle}"></span>
-                                <small class="text-muted movie-year"
-                                    th:text="${' (' + #temporals.format(dto.mcuEntry.releaseDate, 'yyyy') + ')'}"></small>
-                            </td>
-                            <td>
-                                <span th:if="${dto.score != null}" class="badge"
-                                    th:classappend="'tier-' + ${dto.tier.replace(' ', '-')}"
-                                    th:text="${#numbers.formatDecimal(dto.score, 1, 1) + '/5.0'}"></span>
-                                <span th:unless="${dto.score != null}" class="text-muted">—</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ===== RATE TAB ===== -->
-        <div th:if="${tab == 'rate'}">
-            <div th:each="entry : ${moviesByPhase}" class="mb-4">
-                <h5 class="mb-3">Phase <span th:text="${entry.key}"></span></h5>
-                <div class="card p-3">
-                    <div class="d-flex flex-wrap gap-3">
-                        <div th:each="dto : ${entry.value}" class="rate-card text-center" data-bs-toggle="modal"
-                            data-bs-target="#rateModal" th:attr="data-movie-id=${dto.mcuEntry.id},
-                                      data-movie-title=${dto.mcuEntry.originalTitle},
-                                      data-movie-score=${dto.score != null ? dto.score : 0}">
-                            <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
-                                class="poster-thumb-lg" th:alt="${dto.mcuEntry.originalTitle}" />
-                            <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
-                                    justify-content-center text-muted" style="font-size:0.7rem;">
-                                No poster
-                            </div>
-                            <div class="rate-card-title" th:text="${dto.mcuEntry.originalTitle}"></div>
-                            <div class="star-rating star-rating-view mx-auto"
-                                th:attr="data-score=${dto.score != null ? dto.score : 0}">
-                                <span class="star-bg">★★★★★</span>
-                                <span class="star-fill">★★★★★</span>
-                            </div>
+                <div class="d-flex flex-wrap gap-3">
+                    <div th:each="dto : ${entry.value}" class="rate-card text-center" data-bs-toggle="modal"
+                        data-bs-target="#rateModal" th:attr="data-movie-id=${dto.mcuEntry.id},
+                                  data-movie-title=${dto.mcuEntry.originalTitle},
+                                  data-movie-score=${dto.score != null ? dto.score : 0}">
+                        <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
+                            class="poster-thumb-lg" th:alt="${dto.mcuEntry.originalTitle}" />
+                        <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
+                                justify-content-center text-muted" style="font-size:0.7rem;">
+                            No poster
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Shared rating modal, reused for whichever movie card was clicked -->
-            <div class="modal fade" id="rateModal" tabindex="-1" data-bs-theme="dark">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="rateModalTitle"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <div class="star-rating star-rating-interactive" id="rateModalStars">
-                                <span class="star-bg">★★★★★</span>
-                                <span class="star-fill">★★★★★</span>
-                                <div class="star-click-zones">
-                                    <span th:each="s : ${ {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0} }" class="star-zone"
-                                        th:attr="data-value=${s}"></span>
-                                </div>
-                            </div>
-                            <div id="rateModalLabel" class="mt-2 text-muted">Select a rating</div>
-                        </div>
-                        <div class="modal-footer">
-                            <form method="post" id="rateModalForm">
-                                <input type="hidden" name="tab" value="rate" />
-                                <input type="hidden" name="score" id="rateModalScoreInput" />
-                                <button type="submit" class="btn btn-danger" id="rateModalSubmit" disabled>Rate</button>
-                            </form>
+                        <div class="rate-card-title" th:text="${dto.mcuEntry.originalTitle}"></div>
+                        <div class="star-rating star-rating-view mx-auto"
+                            th:attr="data-score=${dto.score != null ? dto.score : 0}">
+                            <span class="star-bg">★★★★★</span>
+                            <span class="star-fill">★★★★★</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== TIER LIST TAB ===== -->
-        <div th:if="${tab == 'tierlist'}">
-            <div class="card p-0">
-                <div th:each="entry : ${tierList}" class="tier-row">
-                    <div class="tier-label" th:classappend="'tier-' + ${entry.key.replace(' ', '-')}"
-                        th:text="${entry.key}">
+        <!-- Shared rating modal, reused for whichever movie card was clicked -->
+        <div class="modal fade" id="rateModal" tabindex="-1" data-bs-theme="dark">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rateModalTitle"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="tier-movies">
-                        <div th:each="dto : ${entry.value}">
-                            <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
-                                th:alt="${dto.mcuEntry.originalTitle}" th:title="${dto.mcuEntry.originalTitle}"
-                                class="tier-poster" />
-                            <div th:unless="${dto.mcuEntry.posterUrl != null}" class="tier-poster-placeholder"
-                                th:text="${dto.mcuEntry.originalTitle}">
+                    <div class="modal-body text-center">
+                        <div class="star-rating star-rating-interactive" id="rateModalStars">
+                            <span class="star-bg">★★★★★</span>
+                            <span class="star-fill">★★★★★</span>
+                            <div class="star-click-zones">
+                                <span th:each="s : ${ {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0} }" class="star-zone"
+                                    th:attr="data-value=${s}"></span>
                             </div>
                         </div>
-                        <span th:if="${entry.value.isEmpty()}" class="text-muted fst-italic ps-2">
-                            No movies yet
-                        </span>
+                        <div id="rateModalLabel" class="mt-2 text-muted">Select a rating</div>
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" id="rateModalForm">
+                            <input type="hidden" name="score" id="rateModalScoreInput" />
+                            <button type="submit" class="btn btn-danger" id="rateModalSubmit" disabled>Rate</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -167,64 +73,12 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const chartLabels = /*[[${chartLabels}]]*/[];
-        const chartScores = /*[[${chartScores}]]*/[];
         const scoreLabels = /*[[${scoreLabels}]]*/{};
 
-        if (document.getElementById('scoreChart')) {
-            new Chart(document.getElementById('scoreChart'), {
-                type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Score',
-                        data: chartScores,
-                        borderColor: '#e94560',
-                        backgroundColor: 'rgba(233,69,96,0.15)',
-                        tension: 0.0,
-                        fill: true,
-                        pointRadius: 5,
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: { min: 0, max: 5, ticks: { color: '#aaa' }, grid: { color: '#0f3460' } },
-                        x: { ticks: { color: '#aaa', maxRotation: 45 }, grid: { color: '#0f3460' } }
-                    },
-                    plugins: { legend: { labels: { color: '#eee' } } }
-                }
-            });
-        }
-
-        // Drag-and-drop within same tier
-        const tbody = document.getElementById('movieTableBody');
-        if (tbody) {
-            Sortable.create(tbody, {
-                handle: '.drag-handle',
-                animation: 150,
-                onEnd(evt) {
-                    const rows = [...tbody.querySelectorAll('tr[data-id]')];
-                    const movedTier = evt.item.dataset.tier;
-
-                    const tierIds = rows
-                        .filter(r => r.dataset.tier === movedTier)
-                        .map(r => parseInt(r.dataset.id));
-
-                    fetch('/movies/reorder', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(tierIds)
-                    });
-                }
-            });
-        }
-
-        // Read-only star display (Rate tab movie cards, view-only)
+        // Read-only star display (Rate movie cards, view-only)
         document.querySelectorAll('.star-rating').forEach(widget => {
             const fill = widget.querySelector('.star-fill');
             const initial = parseFloat(widget.dataset.score) || 0;

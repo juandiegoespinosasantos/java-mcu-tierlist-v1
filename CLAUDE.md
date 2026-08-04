@@ -19,7 +19,7 @@ There are currently no test classes in `src/test`. Devtools is on the classpath,
 
 **Request flow**: `SessionInterceptor` (registered in `WebConfig`) gates every route except `/login` and static assets, redirecting to `/login` if `session.getAttribute("username")` is unset. There's no Spring Security — auth is just a username lookup in `LoginController` (no password) that stashes `username`/`name` in the `HttpSession`. Every downstream controller/service call is scoped by pulling `username` back out of the session and passing it through as a plain string parameter — there's no `Principal`/`Authentication` object.
 
-**Single controller, service-heavy**: `MovieController` has three routes (`/`, `/movies/{id}/score`, `/movies/reorder`) that all delegate to `MovieService`. Nearly all business logic — score lookups, tier resolution, ranking, chart data — lives in `MovieService`, keyed off `username` per call rather than a persisted "current user" concept.
+**Two controllers, service-heavy**: `MovieController` serves the root/rate page (`GET /`, `POST /movies/{id}/score`); `MoviesController` serves the movies page (`GET /movies`, `POST /movies/reorder`). Both delegate to `MovieService`. Nearly all business logic — score lookups, tier resolution, ranking, chart data — lives in `MovieService`, keyed off `username` per call rather than a persisted "current user" concept.
 
 **Tiers are derived, not stored**: `UserMovieScore.score` is the only per-user field that's authoritative; tier (`Excellent`/`Very Good`/`Good`/`Weak`/`Bad`) is computed on the fly from score via `MovieService.resolveTier()` and the `TIER_RANGES`/`TIER_ORDER` constants at the top of `MovieService`. When changing tier boundaries, `TIER_RANGES` and `resolveTier()` must be kept in sync — they currently duplicate the same thresholds independently.
 
@@ -29,7 +29,7 @@ There are currently no test classes in `src/test`. Devtools is on the classpath,
 
 **Persistence**: SQLite file at `mcu-tierlist.db` (repo root), driven through `hibernate-community-dialects`' `SQLiteDialect`. `spring.jpa.hibernate.ddl-auto=update` + `spring.sql.init.mode=always` + `spring.jpa.defer-datasource-initialization=true` means `data.sql` runs after Hibernate creates/updates the schema on every startup — seed data in `data.sql` should be idempotent (e.g. `INSERT OR IGNORE`) or startup will fail/duplicate on repeat runs. Note `mcu-tierlist.db` is currently untracked but *not* gitignored — don't assume it's disposable.
 
-**Templates**: `templates/index.html` (under `src/main/resources`) renders three tabs (`movies`/`rate`/`tierlist`, validated against `MovieController.VALID_TABS`) from one Thymeleaf template driven by the `tab` query param and model attributes assembled in `MovieController.index()`. `templates/login.html` is the only unauthenticated view.
+**Templates**: `templates/index.html` (under `src/main/resources`) renders the rate view (`MovieController.index()` supplies `moviesByPhase`/`scoreLabels`). `templates/movies.html` renders the movies page, which has its own "List" (table + chart) and "Tier List" (read-only tier rows) sub-views toggled via a `view` query param validated against `MoviesController.VALID_VIEWS`, defaulting to `list`; `MoviesController.movies()` only loads the model attributes the active sub-view needs. Both pages share `templates/fragments/navbar.html` (`th:fragment="navbar(activePage)"`) for the nav bar. `templates/login.html` is the only unauthenticated view.
 
 ## Code Conventions
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <nav th:fragment="navbar(activePage)" class="navbar navbar-dark px-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="navbar-brand fw-bold mb-0">🎬 MCU Tier List</span>
+
+            <ul class="nav nav-pills">
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'rate'} ? 'active' : ''"
+                        href="/">Catalog</a></li>
+                <li class="nav-item"><a class="nav-link" th:classappend="${activePage == 'movies'} ? 'active' : ''"
+                        href="/movies">Ranking</a></li>
+            </ul>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-light" th:text="${name}"></span>
+            
+            <form method="post" action="/logout" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+            </form>
+        </div>
+    </nav>
+</body>
+
+</html>
