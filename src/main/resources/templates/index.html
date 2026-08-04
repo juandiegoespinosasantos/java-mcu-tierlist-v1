@@ -18,21 +18,25 @@
         <!-- ===== RATE ===== -->
         <div th:each="entry : ${moviesByPhase}" class="mb-4">
             <h5 class="mb-3">Phase <span th:text="${entry.key}"></span></h5>
+
             <div class="card p-3">
                 <div class="d-flex flex-wrap gap-3">
                     <div th:each="dto : ${entry.value}" class="rate-card text-center" data-bs-toggle="modal"
                         data-bs-target="#rateModal" th:attr="data-movie-id=${dto.mcuEntry.id},
                                   data-movie-title=${dto.mcuEntry.originalTitle},
-                                  data-movie-score=${dto.score != null ? dto.score : 0}">
+                                  data-movie-score=${dto.score == null ? 0 : dto.score.score}">
                         <img th:if="${dto.mcuEntry.posterUrl != null}" th:src="${dto.mcuEntry.posterUrl}"
                             class="poster-thumb-lg" th:alt="${dto.mcuEntry.originalTitle}" />
+
                         <div th:unless="${dto.mcuEntry.posterUrl != null}" class="poster-thumb-lg bg-secondary d-flex align-items-center
                                 justify-content-center text-muted" style="font-size:0.7rem;">
                             No poster
                         </div>
+
                         <div class="rate-card-title" th:text="${dto.mcuEntry.originalTitle}"></div>
+
                         <div class="star-rating star-rating-view mx-auto"
-                            th:attr="data-score=${dto.score != null ? dto.score : 0}">
+                            th:attr="data-score=${dto.score == null ? 0 : dto.score.score}">
                             <span class="star-bg">★★★★★</span>
                             <span class="star-fill">★★★★★</span>
                         </div>
@@ -49,10 +53,12 @@
                         <h5 class="modal-title" id="rateModalTitle"></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body text-center">
                         <div class="star-rating star-rating-interactive" id="rateModalStars">
                             <span class="star-bg">★★★★★</span>
                             <span class="star-fill">★★★★★</span>
+
                             <div class="star-click-zones">
                                 <span th:each="s : ${ {0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0} }" class="star-zone"
                                     th:attr="data-value=${s}"></span>
@@ -60,6 +66,7 @@
                         </div>
                         <div id="rateModalLabel" class="mt-2 text-muted">Select a rating</div>
                     </div>
+
                     <div class="modal-footer">
                         <form method="post" id="rateModalForm">
                             <input type="hidden" name="score" id="rateModalScoreInput" />

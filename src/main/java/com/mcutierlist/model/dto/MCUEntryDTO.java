@@ -15,6 +15,6 @@ public record MCUEntryDTO(Long id,
                           Integer phase,
                           ZonedDateTime releaseDate,
                           String posterUrl,
-                          ZonedDateTime createdAt,
+                          ZonedDateTime createdAt, // TODO: Set as millis
                           ZonedDateTime updatedAt) {
 }

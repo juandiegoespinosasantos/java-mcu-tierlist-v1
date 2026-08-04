@@ -2,6 +2,7 @@ package com.mcutierlist.utils.adapters;
 
 import com.mcutierlist.model.dto.MCUEntryDTO;
 import com.mcutierlist.model.dto.McuEntryScoreDTO;
+import com.mcutierlist.model.dto.ScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
 import com.mcutierlist.model.entities.Score;
@@ -21,30 +22,19 @@ import java.util.Map;
 public final class McuEntryAdapter {
 
     public static McuEntryScoreDTO transform(final MCUEntry movie,
-                                             final Map<Long, MovieScoreXUser> scoredMoviesById,
-                                             final Map<Double, Score> labelMap) {
-        MovieScoreXUser ums = scoredMoviesById.get(movie.getId());
-        Double score = ums != null ? ums.getScore() : null;
-        Score label = score != null ? labelMap.get(score) : null;
-        MCUEntryDTO dto = new MCUEntryDTO(
-                movie.getId(),
-                movie.getOriginalTitle(),
-                movie.getAlternativeTitle(),
-                movie.getPhase(),
-                movie.getReleaseDate(),
-                movie.getPosterUrl(),
-                movie.getCreatedAt(),
-                movie.getUpdatedAt());
+                                             final Map<Long, MovieScoreXUser> scoredMoviesById) {
+        MCUEntryDTO mcuEntryDto = transform(movie);
 
-        return new McuEntryScoreDTO(
-                dto,
-                score,
-                label.getDisplayName(),
-                score != null ? resolveTier(score) : null,
-                ums != null ? ums.getRanking() : null
-        );
+        MovieScoreXUser userScore = scoredMoviesById.get(movie.getId());
+        Score score = (userScore == null) ? null : userScore.getScore();
+        ScoreDTO scoreDto = transform(score);
+
+        Integer ranking = (userScore == null) ? null : userScore.getRanking();
+
+        return new McuEntryScoreDTO(mcuEntryDto, scoreDto, ranking);
     }
 
+    // TODO
     public static String resolveTier(Double score) {
         if (score >= 4.5) return "Excellent";
         if (score >= 4.0) return "Very Good";
@@ -52,5 +42,22 @@ public final class McuEntryAdapter {
         if (score >= 2.0) return "Weak";
 
         return "Bad";
+    }
+
+    private static MCUEntryDTO transform(final MCUEntry entity) {
+        return new MCUEntryDTO(
+                entity.getId(),
+                entity.getOriginalTitle(),
+                entity.getAlternativeTitle(),
+                entity.getPhase(),
+                entity.getReleaseDate(),
+                entity.getPosterUrl(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt());
+    }
+
+    private static ScoreDTO transform(final Score entity) {
+        return (entity == null) ? null : new ScoreDTO(entity.getScore(), entity.getDescription(), entity.getDisplayName());
+
     }
 }

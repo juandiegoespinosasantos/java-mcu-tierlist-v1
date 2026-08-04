@@ -9,8 +9,6 @@ package com.mcutierlist.model.dto;
  */
 
 public record McuEntryScoreDTO(MCUEntryDTO mcuEntry,
-                               Double score,
-                               String scoreLabel,
-                               String tier,
+                               ScoreDTO score,
                                Integer ranking) {
 }
