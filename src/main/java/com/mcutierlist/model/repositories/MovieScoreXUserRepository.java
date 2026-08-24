@@ -21,7 +21,7 @@ public interface MovieScoreXUserRepository extends JpaRepository<MovieScoreXUser
 
     Optional<MovieScoreXUser> findByUserUsernameAndMcuEntryId(String username, Long movieId);
 
-    List<MovieScoreXUser> findByUserUsernameAndScoreBetweenOrderByRankingAsc(String username, Double min, Double max);
+    List<MovieScoreXUser> findByUserUsernameAndScore_ScoreBetweenOrderByRankingAsc(String username, Double min, Double max);
 
-    int countByUserUsernameAndScoreBetween(String username, Double min, Double max);
+    int countByUserUsernameAndScore_ScoreBetween(String username, Double min, Double max);
 }
