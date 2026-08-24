@@ -16,11 +16,18 @@ import java.util.Map;
  *
  * @author juandiegoespinosasantos@outlook.com
  * @version Aug 03, 2026
- * @since 17
+ * @since 25
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class McuEntryAdapter {
 
+    /**
+     * Transforms a {@link MCUEntry} entity and its associated user score into a {@link McuEntryScoreDTO}.
+     *
+     * @param movie            The {@link MCUEntry} entity to be transformed.
+     * @param scoredMoviesById A map of movie IDs to their corresponding {@link MovieScoreXUser} entities, representing the user's scores for the movies.
+     * @return A {@link McuEntryScoreDTO} containing the transformed movie and its associated user score.
+     */
     public static McuEntryScoreDTO transform(final MCUEntry movie,
                                              final Map<Long, MovieScoreXUser> scoredMoviesById) {
         MCUEntryDTO mcuEntryDto = transform(movie);

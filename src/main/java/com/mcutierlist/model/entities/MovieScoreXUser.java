@@ -62,4 +62,8 @@ public class MovieScoreXUser implements Serializable {
 
     @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
+
+    public Long getMcuEntryId() {
+        return (mcuEntry == null) ? null : mcuEntry.getId();
+    }
 }

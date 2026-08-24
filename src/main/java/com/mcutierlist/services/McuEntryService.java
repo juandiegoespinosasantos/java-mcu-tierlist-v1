@@ -1,6 +1,5 @@
 package com.mcutierlist.services;
 
-import com.mcutierlist.enums.MovieOrder;
 import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
@@ -14,15 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Service handling movie scoring, tiering and ranking for the current user.
+ * Implementation for {@link MCUEntry} business logic service. *
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026
@@ -30,9 +27,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-public class MovieService implements IMovieService {
-
-    private static final List<String> TIER_ORDER = List.of("Excellent", "Very Good", "Good", "Weak", "Bad");
+public class McuEntryService implements IMcuEntryService {
 
     private static final Map<String, Double[]> TIER_RANGES = Map.of(
             "Excellent", new Double[]{4.5, 5.0},
@@ -47,37 +42,27 @@ public class MovieService implements IMovieService {
     private final ScoreRepository scoreRepository;
     private final MovieScoreXUserRepository movieScoreXUserRepository;
 
-    public MovieService(MCUEntryRepository mcuEntryRepository,
-                        UserRepository userRepository,
-                        ScoreRepository scoreRepository,
-                        MovieScoreXUserRepository movieScoreXUserRepository) {
+    public McuEntryService(MCUEntryRepository mcuEntryRepository,
+                           UserRepository userRepository,
+                           ScoreRepository scoreRepository,
+                           MovieScoreXUserRepository movieScoreXUserRepository) {
         this.mcuEntryRepository = mcuEntryRepository;
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.movieScoreXUserRepository = movieScoreXUserRepository;
     }
 
-    public List<McuEntryScoreDTO> getMoviesWithScores(final String username, final MovieOrder orderBy) {
-        List<MCUEntry> allMovies = mcuEntryRepository.findAllByOrderByReleaseDateAsc();
-
-        Map<Long, MovieScoreXUser> userScoresByMovieId = movieScoreXUserRepository.findByUserUsername(username)
-                .stream()
-                .collect(Collectors.toMap(msu -> msu.getMcuEntry().getId(), ums -> ums));
-
-        Comparator<McuEntryScoreDTO> comparator = MovieOrder.BY_ORIGINAL_ORDER.equals(orderBy) ?
-                Comparator.comparing(dto -> dto.mcuEntry().releaseDate()) :
-                Comparator.comparing(McuEntryScoreDTO::ranking, Comparator.nullsLast(Comparator.naturalOrder()));
-
-        return allMovies.stream()
-                .map(movie -> McuEntryAdapter.transform(movie, userScoresByMovieId))
-                .sorted(comparator)
-                .collect(Collectors.toList());
-    }
-
+    /**
+     * Returns a map of movies grouped by their phase for the given user.
+     *
+     * @param username Requesting username.
+     * @return Map of user scored {@link McuEntryScoreDTO}, grouped by phase.
+     */
+    @Override
     public Map<Integer, List<McuEntryScoreDTO>> getMoviesByPhase(final String username) {
-        return getMoviesWithScores(username, MovieOrder.BY_ORIGINAL_ORDER)
+        return getMoviesWithScores(username)
                 .stream()
-                .collect(Collectors.groupingBy(dto -> dto.mcuEntry().phase(), LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(dto -> dto.mcuEntryPhase(), LinkedHashMap::new, Collectors.toList()));
     }
 
     public Map<String, String> getScoreLabelsForDisplay() {
@@ -113,4 +98,14 @@ public class MovieService implements IMovieService {
         movieScoreXUserRepository.save(ums);
     }
 
+    private List<McuEntryScoreDTO> getMoviesWithScores(final String username) {
+        Map<Long, MovieScoreXUser> userScoresByMovieId = movieScoreXUserRepository.findByUserUsername(username)
+                .stream()
+                .collect(Collectors.toMap(msu -> msu.getMcuEntryId(), ums -> ums));
+
+        return mcuEntryRepository.findAllByOrderByReleaseDateAsc()
+                .stream()
+                .map(movie -> McuEntryAdapter.transform(movie, userScoresByMovieId))
+                .collect(Collectors.toList());
+    }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repository for the pre-seeded {@link MCUEntry} catalog.
+ * Repository for {@link MCUEntry} entity.
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026

@@ -1,6 +1,6 @@
 package com.mcutierlist.controller;
 
-import com.mcutierlist.services.MovieService;
+import com.mcutierlist.services.McuEntryService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class MovieController {
 
-    private final MovieService movieService;
+    private final McuEntryService movieService;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(McuEntryService movieService) {
         this.movieService = movieService;
     }
 
