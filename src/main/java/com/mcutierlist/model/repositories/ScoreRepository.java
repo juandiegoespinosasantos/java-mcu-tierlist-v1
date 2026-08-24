@@ -13,8 +13,7 @@ import java.util.List;
  * @version Aug 1, 2026
  * @since 25
  */
+// TODO: Remove
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, Double> {
-
-    List<Score> findAllByOrderByScoreDesc();
 }

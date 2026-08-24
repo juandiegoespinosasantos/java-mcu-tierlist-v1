@@ -16,4 +16,6 @@ import java.util.Map;
 public interface IMcuEntryService {
 
     Map<Integer, List<McuEntryScoreDTO>> getMoviesByPhase(String username);
+
+    Map<String, String> getScoreLabelsForDisplay();
 }

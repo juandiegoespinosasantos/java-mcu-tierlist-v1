@@ -4,6 +4,7 @@ import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
 import com.mcutierlist.model.entities.Score;
+import com.mcutierlist.model.enums.Scores;
 import com.mcutierlist.model.repositories.MCUEntryRepository;
 import com.mcutierlist.model.repositories.MovieScoreXUserRepository;
 import com.mcutierlist.model.repositories.ScoreRepository;
@@ -65,10 +66,20 @@ public class McuEntryService implements IMcuEntryService {
                 .collect(Collectors.groupingBy(dto -> dto.mcuEntryPhase(), LinkedHashMap::new, Collectors.toList()));
     }
 
+    /**
+     * Returns a map of score labels for display purposes.
+     *
+     * @return Map of score labels for display.
+     */
+    @Override
     public Map<String, String> getScoreLabelsForDisplay() {
-        return scoreRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(score -> score.getScore().toString(), Score::getDisplayName, (a, b) -> b, LinkedHashMap::new));
+        Map<String, String> map = new LinkedHashMap<>();
+
+        for (Scores score : Scores.values()) {
+            map.put(score.name(), score.getDisplayName());
+        }
+
+        return map;
     }
 
     public void updateScore(String username, Long movieId, Double newScoreValue) {

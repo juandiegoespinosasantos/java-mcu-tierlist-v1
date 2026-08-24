@@ -4,6 +4,7 @@ import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
 import com.mcutierlist.model.entities.Score;
+import com.mcutierlist.model.enums.Scores;
 import com.mcutierlist.model.repositories.MCUEntryRepository;
 import com.mcutierlist.model.repositories.MovieScoreXUserRepository;
 import com.mcutierlist.model.repositories.ScoreRepository;
@@ -119,6 +120,21 @@ class McuEntryServiceTest {
 
         Mockito.verify(mockMcuEntryRepository).findAllByOrderByReleaseDateAsc();
         Mockito.verify(mockMovieScoreXUserRepository).findByUserUsername(USERNAME);
+    }
+
+    @Test
+    @DisplayName("given the score tiers, when get score labels for display, then return map of tier name to display name")
+    void givenScoreTiers_whenGetScoreLabelsForDisplay_thenReturnMapOfTierNameToDisplayName() {
+        // when
+        Map<String, String> actualLabels = service.getScoreLabelsForDisplay();
+
+        // then
+        Assertions.assertNotNull(actualLabels);
+        Assertions.assertEquals(Scores.values().length, actualLabels.size());
+
+        for (Scores tier : Scores.values()) {
+            Assertions.assertEquals(tier.getDisplayName(), actualLabels.get(tier.name()));
+        }
     }
 
     private MCUEntry buildMovie(Long id, String title, Integer phase) {
