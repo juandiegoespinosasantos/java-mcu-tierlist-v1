@@ -5,7 +5,7 @@ import com.mcutierlist.model.dto.McuEntryScoreDTO;
 import com.mcutierlist.model.dto.ScoreDTO;
 import com.mcutierlist.model.entities.MCUEntry;
 import com.mcutierlist.model.entities.MovieScoreXUser;
-import com.mcutierlist.model.entities.Score;
+import com.mcutierlist.model.enums.Scores;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -33,22 +33,11 @@ public final class McuEntryAdapter {
         MCUEntryDTO mcuEntryDto = transform(movie);
 
         MovieScoreXUser userScore = scoredMoviesById.get(movie.getId());
-        Score score = (userScore == null) ? null : userScore.getScore();
-        ScoreDTO scoreDto = transform(score);
+        ScoreDTO scoreDto = transform((userScore == null) ? null : userScore.getScore());
 
         Integer ranking = (userScore == null) ? null : userScore.getRanking();
 
         return new McuEntryScoreDTO(mcuEntryDto, scoreDto, ranking);
-    }
-
-    // TODO
-    public static String resolveTier(Double score) {
-        if (score >= 4.5) return "Excellent";
-        if (score >= 4.0) return "Very Good";
-        if (score >= 3.0) return "Good";
-        if (score >= 2.0) return "Weak";
-
-        return "Bad";
     }
 
     private static MCUEntryDTO transform(final MCUEntry entity) {
@@ -63,8 +52,11 @@ public final class McuEntryAdapter {
                 entity.getUpdatedAt());
     }
 
-    private static ScoreDTO transform(final Score entity) {
-        return (entity == null) ? null : new ScoreDTO(entity.getScore(), entity.getDescription(), entity.getDisplayName());
+    private static ScoreDTO transform(final Double scoreValue) {
+        if (scoreValue == null) return null;
 
+        Scores scores = Scores.valueOfRange(scoreValue);
+
+        return new ScoreDTO(scoreValue, scores.name(), scores.getDisplayName());
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository for manually-seeded {@link User} accounts.
+ * Repository for {@link User} entity.
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026

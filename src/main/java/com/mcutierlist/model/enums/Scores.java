@@ -23,4 +23,12 @@ public enum Scores {
     private final String displayName;
     private final double minRange;
     private final double maxRange;
+
+    public static Scores valueOfRange(Double range) throws IllegalArgumentException {
+        for (Scores score : values()) {
+            if ((score.getMinRange() <= range) && (range <= score.getMaxRange())) return score;
+        }
+
+        throw new IllegalArgumentException("No score found for range: " + range);
+    }
 }

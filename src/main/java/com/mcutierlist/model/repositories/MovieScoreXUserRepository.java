@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository for per-user {@link MovieScoreXUser} scores and rankings.
+ * Repository for {@link MovieScoreXUser} entity.
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026
@@ -19,9 +19,5 @@ public interface MovieScoreXUserRepository extends JpaRepository<MovieScoreXUser
 
     List<MovieScoreXUser> findByUserUsername(String username);
 
-    Optional<MovieScoreXUser> findByUserUsernameAndMcuEntryId(String username, Long movieId);
-
-    List<MovieScoreXUser> findByUserUsernameAndScore_ScoreBetweenOrderByRankingAsc(String username, Double min, Double max);
-
-    int countByUserUsernameAndScore_ScoreBetween(String username, Double min, Double max);
+    Optional<MovieScoreXUser> findByUserUsernameAndMcuEntry_Id(String username, Long movieId);
 }

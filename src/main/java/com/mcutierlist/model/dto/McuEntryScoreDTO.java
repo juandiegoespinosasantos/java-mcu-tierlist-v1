@@ -1,7 +1,9 @@
 package com.mcutierlist.model.dto;
 
+import com.mcutierlist.model.entities.MovieScoreXUser;
+
 /**
- * DTO joining a movie with the current user's score, label, tier and ranking.
+ * Data transfer object for {@link MovieScoreXUser} entity.
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026

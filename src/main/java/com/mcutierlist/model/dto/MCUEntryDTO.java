@@ -1,9 +1,11 @@
 package com.mcutierlist.model.dto;
 
+import com.mcutierlist.model.entities.MCUEntry;
+
 import java.time.ZonedDateTime;
 
 /**
- * DTO for MCU entry.
+ * Data transfer object for {@link MCUEntry} entity.
  *
  * @author jdespinosa0014@outlook.com
  * @version Aug 1, 2026

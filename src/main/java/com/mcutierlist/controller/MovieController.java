@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class MovieController {
 
-    private final McuEntryService movieService;
+    private final McuEntryService service;
 
-    public MovieController(McuEntryService movieService) {
-        this.movieService = movieService;
+    public MovieController(McuEntryService service) {
+        this.service = service;
     }
 
     @GetMapping("/")
@@ -30,8 +30,8 @@ public class MovieController {
         String username = (String) session.getAttribute("username");
         model.addAttribute("username", username);
         model.addAttribute("name", session.getAttribute("name"));
-        model.addAttribute("moviesByPhase", movieService.getMoviesByPhase(username));
-        model.addAttribute("scoreLabels", movieService.getScoreLabelsForDisplay());
+        model.addAttribute("moviesByPhase", service.getMoviesByPhase(username));
+        model.addAttribute("scoreLabels", service.getScoreLabelsForDisplay());
         return "index";
     }
 
@@ -40,7 +40,7 @@ public class MovieController {
                               @RequestParam Double score,
                               HttpSession session) {
         String username = (String) session.getAttribute("username");
-        movieService.updateScore(username, id, score);
+        service.updateScore(username, id, score);
         return "redirect:/";
     }
 }

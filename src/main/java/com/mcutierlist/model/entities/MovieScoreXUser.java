@@ -35,7 +35,7 @@ import java.time.ZonedDateTime;
 public class MovieScoreXUser implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = -5647382910473625181L;
+    private static final long serialVersionUID = -5647382910473625182L;
 
     @Id
     @Column(name = "id")
@@ -50,9 +50,8 @@ public class MovieScoreXUser implements Serializable {
     @JoinColumn(name = "mcu_entry")
     private MCUEntry mcuEntry;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "score")
-    private Score score;
+    @Column(name = "score")
+    private Double score;
 
     @Column(name = "ranking")
     private Integer ranking;
