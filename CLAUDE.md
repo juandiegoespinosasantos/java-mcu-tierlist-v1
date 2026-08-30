@@ -27,14 +27,10 @@ There are currently no test classes in `src/test`. Devtools is on the classpath,
 
 **Data model** (`entity/`): `User` (username PK, no password), `Movie` (pre-seeded catalog, no create/delete from the app), `ScoreLabel` (PK is the score itself, 0.5–5.0 step 0.5, seeded/shared across users), `UserMovieScore` (the only mutable per-user state: score + ranking, FK to `User` + `Movie`). `MovieScoreDTO` is the read-model that joins a movie with the current user's score/label/tier/ranking for template rendering.
 
-**Persistence**: SQLite file at `mcu-tierlist.db` (repo root), driven through `hibernate-community-dialects`' `SQLiteDialect`. `spring.jpa.hibernate.ddl-auto=update` + `spring.sql.init.mode=always` + `spring.jpa.defer-datasource-initialization=true` means `data.sql` runs after Hibernate creates/updates the schema on every startup — seed data in `data.sql` should be idempotent (e.g. `INSERT OR IGNORE`) or startup will fail/duplicate on repeat runs. Note `mcu-tierlist.db` is currently untracked but *not* gitignored — don't assume it's disposable.
+**Persistence**: PostgreSQL.
 
 **Templates**: `templates/index.html` (under `src/main/resources`) renders the rate view (`MovieController.index()` supplies `moviesByPhase`/`scoreLabels`). `templates/movies.html` renders the movies page, which has its own "List" (table + chart) and "Tier List" (read-only tier rows) sub-views toggled via a `view` query param validated against `MoviesController.VALID_VIEWS`, defaulting to `list`; `MoviesController.movies()` only loads the model attributes the active sub-view needs. Both pages share `templates/fragments/navbar.html` (`th:fragment="navbar(activePage)"`) for the nav bar. `templates/login.html` is the only unauthenticated view.
 
 ## Code Conventions
 
 See @docs/CODE_STYLE.md
-
-## Notes
-
-- The repo root also has its own untracked `index.html`, `movies.csv`, and `movies.json`, separate from the Thymeleaf template — these look like reference/scratch data (not gitignored, not part of the build). Confirm with the user before treating them as disposable.
